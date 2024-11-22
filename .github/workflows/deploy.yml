@@ -17,13 +17,15 @@ jobs:
           node-version: '20'
           
       - name: Install dependencies
+        working-directory: ./ziyangli
         run: npm install
         
       - name: Build website
+        working-directory: ./ziyangli
         run: npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          publish_dir: ./ziyangli/build
