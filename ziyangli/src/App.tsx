@@ -12,21 +12,26 @@ type BlogPostData = {
   slug: string;
 };
 
-// Create an array of example blog posts
-const blogPosts: BlogPostData[] = [
-  { id: 1, title: "My Journey as a Software Developer", slug: "journey-as-developer" },
-  { id: 2, title: "React Hooks: A Deep Dive", slug: "react-hooks-deep-dive" },
-  { id: 3, title: "The Future of AI in Software Development", slug: "ai-in-software-dev" },
-];
-
 const calculateAge = (birthDate: Date): number => {
   const today = new Date();
   let age = today.getFullYear() - birthDate.getFullYear();
-  if (today < new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate())) {
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
     age--;
   }
   return age;
 };
+
+// Parse blog posts from environment variable
+const BLOG_POSTS: BlogPostData[] = (() => {
+  try {
+    return process.env.REACT_APP_BLOG_POSTS ? 
+      JSON.parse(process.env.REACT_APP_BLOG_POSTS) : [];
+  } catch (error) {
+    console.error('Failed to parse blog posts:', error);
+    return [];
+  }
+})();
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -51,7 +56,7 @@ function App() {
               
               <h2>Blog Posts:</h2>
               <ul className="blog-list">
-                {blogPosts.map((post) => (
+                {BLOG_POSTS.map((post) => (
                   <li key={post.id}>
                     <Link to={`/blog/${post.slug}`}>{post.title}</Link>
                   </li>
