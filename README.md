@@ -1,2 +1,2 @@
-# ziyangli_website
-ziyang.li is my personal site to host information about myself and my thoughts. 
+# https://ziyang.li my personal website
+ziyang.li is all about ziyang li.
