@@ -1,11 +1,17 @@
-# My Journey as a Software Developer
+# (WIP) My Journey as a Software Developer
 
 This is the content of the Journey as a Developer blog post...
 
-## My First Steps
+## History
 
-temp
+Installing Linux
 
-## Challenges I Faced
+Attending Auburn University and studying Software Engineering.
 
-temp
+Joining the ACM club, Running Auburn's hackathon.
+
+Internships
+
+## Current
+
+WIP
