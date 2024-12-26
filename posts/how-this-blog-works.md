@@ -1,4 +1,4 @@
-# This blog website
+# (WIP) How this blog website posts
 
 ## React setup
 
