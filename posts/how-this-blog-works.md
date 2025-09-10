@@ -6,7 +6,7 @@
 
 I added this new post in the public/posts folder
 
-then I just need to run npm run post
+then I just need to run >npm run post
 
 auto git add commit with new post message and push to Github
 
