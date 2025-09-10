@@ -38,3 +38,10 @@ This is a React-based personal website for ziyang.li with the following key arch
 - Age calculation based on hardcoded birthdate (2000-08-28)
 - Dark mode as default theme preference
 - Simple single-page layout without routing
+
+### TODO
+- implement routing and navigation
+- new folder under `ziyangli/src/` called `pages`
+- it will contain React pages for different sections of the website
+- plan to have add a page each of the different projects I want to do.
+- for example, I plan to build a website where user type and if they stop typing, it will delete all the text they typed. This can be just a sub page under ziyang.li/danger-type.
