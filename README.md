@@ -1,4 +1,4 @@
-# My Personal Website ziyang.li
+# My Personal Website [ziyang.li](https://ziyang.li)
 ziyang.li is a website about ziyang li. Add me on [LinkedIn](https://www.linkedin.com/in/ziyangg/)
 
 ## About Me
