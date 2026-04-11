@@ -9,6 +9,7 @@ import TypeScriptAsyncPromise from './2024-05-typescript-async-promise';
 import LeetcodeBacktracking from './2024-06-leetcode-backtracking';
 import LeetcodeKnapsack from './2024-07-leetcode-knapsack';
 import LeetcodeBinarySearch from './2024-08-leetcode-binary-search';
+import LeetcodeDP from './2026-04-leetcode-dp';
 
 /**
  * Central metadata registry for all blog posts
@@ -126,6 +127,20 @@ export const blogPosts: BlogPostRegistry = {
     published: true,
     featured: true,
     component: LeetcodeBinarySearch,
+  },
+  'leetcode-dp': {
+    id: '2026-04-leetcode-dp',
+    slug: 'leetcode-dp',
+    title: 'LeetCode Dynamic Programming: 1D, 2D, 3D DP Patterns',
+    description: 'Master dynamic programming with 1D DP (House Robber), 2D DP (Word Break), and 3D DP (Knight Probability). Learn recursive memoization vs tabulation, when to use each approach, and space optimization techniques.',
+    date: '2026-04-11T00:00:00Z',
+    author: 'Ziyang Li',
+    category: 'Leetcode',
+    tags: ['Algorithms', 'Dynamic Programming', 'Recursion', 'Memoization', 'Python', 'Problem Solving'],
+    readTime: 22,
+    published: true,
+    featured: true,
+    component: LeetcodeDP,
   },
 };
 
