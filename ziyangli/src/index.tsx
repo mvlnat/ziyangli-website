@@ -13,7 +13,7 @@ root.render(
   </React.StrictMode>,
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// Log web vitals to console in development
+// Core Web Vitals: LCP (Largest Contentful Paint), FID (First Input Delay), CLS (Cumulative Layout Shift)
+// Other metrics: FCP (First Contentful Paint), TTFB (Time to First Byte)
+reportWebVitals(console.log);
