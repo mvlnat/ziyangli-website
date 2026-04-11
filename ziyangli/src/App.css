@@ -584,6 +584,49 @@ input:checked + .slider:before {
 
 /* Code blocks are now handled by CodeBlock component with syntax highlighting */
 
+/* Fix for syntax highlighter padding issues */
+.blog-post-content pre {
+    margin: 0.75rem 0;
+}
+
+.blog-post-content pre > code {
+    display: block;
+    overflow-x: auto;
+    box-sizing: border-box;
+}
+
+/* Ensure proper spacing and font weight in syntax highlighter */
+.blog-post-content pre code span {
+    line-height: 1.5;
+    font-weight: 500 !important;
+    background: transparent !important;
+}
+
+/* Fix for language-plaintext and all code blocks */
+.blog-post-content pre[class*="language-"] {
+    overflow: visible;
+}
+
+.blog-post-content pre[class*="language-"] code {
+    display: block;
+    padding: 0 !important;
+    background: transparent !important;
+    line-height: 1.5;
+    font-weight: 500 !important;
+}
+
+/* Remove grey highlights from syntax highlighter tokens */
+.blog-post-content pre code span[style*="background"] {
+    background: transparent !important;
+}
+
+/* Ensure all code has proper font weight */
+.blog-post-content pre,
+.blog-post-content pre code,
+.blog-post-content pre code * {
+    font-weight: 500 !important;
+}
+
 .blog-post-footer {
     margin-top: 2rem;
     padding-top: 1.25rem;
