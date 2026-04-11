@@ -260,6 +260,16 @@ input:checked + .slider:before {
     height: 24px;
 }
 
+/* Adjust for light mode */
+.light-mode .linkedin-button {
+    background-color: #0066cc; /* Darker blue for better visibility on eggshell */
+    color: #ffffff;
+}
+
+.light-mode .linkedin-button:hover {
+    background-color: #004080;
+}
+
 /* Adjust for dark mode if needed */
 .dark-mode .linkedin-button {
     background-color: #0077b5; /* You can keep it the same or adjust as needed */
