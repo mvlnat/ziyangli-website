@@ -10,6 +10,7 @@ import LeetcodeBacktracking from './2024-06-leetcode-backtracking';
 import LeetcodeKnapsack from './2024-07-leetcode-knapsack';
 import LeetcodeBinarySearch from './2024-08-leetcode-binary-search';
 import LeetcodeDP from './2026-04-leetcode-dp';
+import BuildingClaudeCodeSkills from './2026-04-building-claude-code-skills';
 
 /**
  * Central metadata registry for all blog posts
@@ -142,6 +143,20 @@ export const blogPosts: BlogPostRegistry = {
     featured: true,
     component: LeetcodeDP,
   },
+  'building-claude-code-skills': {
+    id: '2026-04-building-claude-code-skills',
+    slug: 'building-claude-code-skills',
+    title: 'Building Skills for Claude Code',
+    description: 'Learn how to build custom skills for Claude Code. Create reusable workflows with slash commands, handle parameters, and write clear instructions that Claude follows consistently.',
+    date: '2026-04-11T00:00:00Z',
+    author: 'Ziyang Li',
+    category: 'AI',
+    tags: ['Claude Code', 'AI', 'Skills', 'Automation', 'Developer Tools', 'Workflows'],
+    readTime: 18,
+    published: true,
+    featured: true,
+    component: BuildingClaudeCodeSkills,
+  },
 };
 
 /**
@@ -183,8 +198,8 @@ export const getAllCategories = (): string[] => {
     if (post.category) categories.add(post.category);
   });
 
-  // Custom order: Personal, Leetcode, Tech, then alphabetical for any others
-  const categoryOrder = ['Personal', 'Leetcode', 'Tech'];
+  // Custom order: Personal, AI, Leetcode, Tech, then alphabetical for any others
+  const categoryOrder = ['Personal', 'AI', 'Leetcode', 'Tech'];
   const categoryArray = Array.from(categories);
 
   return categoryArray.sort((a, b) => {
