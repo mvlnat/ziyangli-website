@@ -31,6 +31,9 @@ const Home: React.FC = () => {
 
       <section className="home-links">
         <p>
+          <Link to="/projects">Check out my projects →</Link>
+        </p>
+        <p>
           <Link to="/blog">Check out my blog →</Link>
         </p>
       </section>

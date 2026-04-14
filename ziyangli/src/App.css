@@ -738,3 +738,73 @@ input:checked + .slider:before {
     font-size: 3rem;
     margin-bottom: 0.5rem;
 }
+
+/* ===== PROJECTS PAGE ===== */
+.projects-index {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.projects-header {
+    margin-bottom: 1.5rem;
+}
+
+.projects-header h1 {
+    font-size: 2rem;
+    margin-bottom: 0.35rem;
+}
+
+.projects-header p {
+    opacity: 0.7;
+    font-size: 0.95rem;
+}
+
+.project-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.project-card {
+    display: block;
+    padding: 1.25rem;
+    border: 2px solid;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dark-mode .project-card {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .project-card:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.light-mode .project-card {
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+.light-mode .project-card:hover {
+    border-color: rgba(0, 0, 0, 0.4);
+}
+
+.project-card h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.2rem;
+}
+
+.project-card p {
+    margin: 0;
+    opacity: 0.8;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}

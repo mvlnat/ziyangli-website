@@ -12,6 +12,7 @@ const Navigation: React.FC = () => {
     <nav className="main-navigation" role="navigation" aria-label="Main navigation">
       <ul>
         <li><Link to="/" className={isActive('/')}>Home</Link></li>
+        <li><Link to="/projects" className={isActive('/projects')}>Projects</Link></li>
         <li><Link to="/blog" className={isActive('/blog')}>Blog</Link></li>
         <li><Link to="/about" className={isActive('/about')}>About</Link></li>
       </ul>
