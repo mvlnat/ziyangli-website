@@ -238,6 +238,98 @@ const KafkaSystemDesign: React.FC = () => {
         cases. Tiered storage helps achieve cost-effective long retention.
       </p>
 
+      <h2>Producer Tuning</h2>
+      <p>
+        Instead of sending messages one by one, the producer accumulates messages in
+        a buffer (RecordAccumulator) organized by partition. A sender thread pulls
+        batches from this buffer and sends them to brokers. This batching reduces
+        network overhead and broker load.
+      </p>
+
+      <h3>Batching Configuration</h3>
+      <p>
+        Two settings control when batches are sent: <code>batch.size</code> (bytes)
+        and <code>linger.ms</code> (time). A batch is sent when either limit is
+        reached. Increase <code>batch.size</code> for higher throughput when latency
+        is acceptable. Increase <code>linger.ms</code> to wait longer for fuller
+        batches. Decrease both for lower latency at the cost of throughput.
+      </p>
+
+      <h3>In-Flight Requests</h3>
+      <p>
+        The setting <code>max.in.flight.requests.per.connection</code> controls how
+        many batches can be sent without waiting for acknowledgment. The default is 5.
+        Higher values increase throughput but can break ordering if a batch fails and
+        retries while later batches succeed. Setting it to 1 guarantees ordering but
+        reduces throughput.
+      </p>
+
+      <h3>Idempotent Producers</h3>
+      <p>
+        Enabling <code>enable.idempotence=true</code> allows Kafka to deduplicate
+        retries using sequence numbers. This maintains ordering even with multiple
+        in-flight requests. Idempotence requires <code>acks=all</code>,
+        <code>max.in.flight.requests.per.connection &lt;= 5</code>, and
+        <code>retries &gt; 0</code>. Kafka enforces these settings automatically
+        when idempotence is enabled.
+      </p>
+
+      <h3>Producer Acknowledgments</h3>
+      <p>
+        The <code>acks</code> setting controls durability guarantees.
+        With <code>acks=0</code>, the producer does not wait for acknowledgment,
+        providing maximum throughput but risking data loss.
+        With <code>acks=1</code>, the producer waits for the leader to acknowledge,
+        balancing throughput and durability but risking loss if the leader fails
+        before replication.
+        With <code>acks=all</code>, the producer waits for all in-sync replicas to
+        acknowledge, providing the strongest durability at the cost of latency.
+      </p>
+
+      <h2>Consumer Assignment Strategies</h2>
+      <p>
+        When consumers join a group, Kafka must decide which partitions each consumer
+        handles. The assignment strategy determines this distribution.
+      </p>
+      <p>
+        The Range strategy divides partitions into contiguous ranges. With 6 partitions
+        and 2 consumers, consumer 1 gets partitions 0, 1, 2 and consumer 2 gets 3, 4, 5.
+        This co-locates same-numbered partitions across topics but can be uneven with
+        odd partition counts.
+      </p>
+      <p>
+        The RoundRobin strategy distributes partitions one by one across consumers,
+        providing even distribution but no co-location guarantees.
+      </p>
+      <p>
+        The Sticky strategy works like RoundRobin but tries to preserve existing
+        assignments during rebalancing, minimizing partition movement.
+      </p>
+      <p>
+        The CooperativeSticky strategy adds incremental rebalancing. Instead of all
+        consumers stopping during rebalance, only the partitions being moved pause.
+        This improves availability during scaling events. CooperativeSticky is
+        generally preferred for production workloads.
+      </p>
+
+      <h2>Scaling Considerations</h2>
+      <p>
+        Adding consumers is straightforward—new consumers join the group and receive
+        partitions after a rebalance. However, scaling is limited by partition count.
+        More consumers than partitions means idle consumers.
+      </p>
+      <p>
+        Adding partitions is risky. The formula <code>hash(key) % partitionCount</code>
+        produces different results with a new partition count. Messages for the same
+        key will go to different partitions after the change, breaking ordering
+        guarantees for existing keys. Old messages remain in old partitions while new
+        messages go to potentially different partitions.
+      </p>
+      <p>
+        Because partition count is difficult to change safely, we should over-provision
+        partitions upfront based on expected peak throughput and consumer count.
+      </p>
+
       <h2>Common Edge Cases</h2>
 
       <h3>Consumer Lag</h3>
