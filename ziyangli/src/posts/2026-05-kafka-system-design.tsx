@@ -60,6 +60,29 @@ const KafkaSystemDesign: React.FC = () => {
         processing across different entities.
       </p>
 
+      <h3>Partition Assignment</h3>
+      <p>
+        When a producer sends a message with a key, Kafka determines the partition using
+        a hash function: <code>partition = hash(key) % numPartitions</code>. Kafka uses
+        murmur2 hash by default. The same key always goes to the same partition, as long
+        as the partition count doesn't change.
+      </p>
+      <p>
+        For messages without a key, Kafka uses sticky partitioning (default since Kafka
+        2.4). The producer "sticks" to one partition until the batch is full or
+        <code>linger.ms</code> expires, then switches to another partition. This improves
+        batching efficiency compared to the older round-robin approach, which cycled
+        through partitions one message at a time and created many small batches.
+      </p>
+      <p>
+        On the consumer side, Kafka normally assigns partitions automatically through
+        consumer group coordination. However, consumers can manually assign specific
+        partitions using <code>assign()</code> instead of <code>subscribe()</code>. Manual
+        assignment bypasses consumer group coordination—no automatic rebalancing, and we
+        manage offsets and failover ourselves. This is useful when a specific consumer
+        must handle specific partitions.
+      </p>
+
       <h3>Consumer Groups</h3>
       <p>
         Consumers in the same group split partitions among themselves. Each partition is
