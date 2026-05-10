@@ -144,28 +144,38 @@ const KafkaSystemDesign: React.FC = () => {
 
       <h3>At-Most-Once</h3>
       <p>
-        We commit the offset before processing the message. If processing fails, the
-        message is lost because we've already moved past it. This approach is fast but
-        lossy, suitable for metrics, logs, or anything we can afford to lose.
+        Data is not duplicated, but data can be lost. We commit the offset before
+        processing the message. If processing fails, we've already moved past it and
+        the message is lost. This approach is fast but lossy, suitable for metrics,
+        logs, or anything we can afford to lose.
       </p>
 
       <h3>At-Least-Once</h3>
       <p>
-        We commit the offset after processing. If the consumer crashes after processing
-        but before committing, the message gets reprocessed on restart. This requires
-        idempotent consumers and is the most common choice in practice.
+        Data is not lost, but data can be duplicated. We commit the offset after
+        processing. If the consumer crashes after processing but before committing,
+        the message gets reprocessed on restart. This requires idempotent consumers
+        to handle duplicates and is the most common choice in practice.
       </p>
 
       <h3>Exactly-Once</h3>
       <p>
-        Kafka supports exactly-once semantics through transactions, combining idempotent
-        producers with transactional consumers. This is more complex and slower but
-        necessary for financial transactions or situations where duplicates cause problems.
+        Data is neither lost nor duplicated. Kafka achieves this using Producer IDs
+        (PID) and sequence numbers (SN). Each producer receives a unique PID, and each
+        message sent to a partition gets an incrementing sequence number. The broker
+        tracks the last sequence number for each <code>&lt;PID, partition&gt;</code> pair.
       </p>
       <p>
-        It's important to note that exactly-once applies within Kafka itself. End-to-end
-        exactly-once semantics that include external systems require idempotent operations
-        or distributed transactions.
+        When a message arrives, the broker checks the sequence number. If it equals
+        the expected value (last + 1), the broker accepts and writes it. If the
+        sequence number is smaller than expected, the message is a duplicate from a
+        retry and the broker ignores it. If the sequence number is larger than
+        expected, something went wrong and the broker throws an OutOfOrderSequenceException.
+      </p>
+      <p>
+        This mechanism requires <code>enable.idempotence=true</code>, which enforces
+        <code>acks=all</code>. For end-to-end exactly-once that includes external
+        systems, we need idempotent operations or distributed transactions.
       </p>
 
       <h2>Failure Modes</h2>
