@@ -11,6 +11,7 @@ import LeetcodeKnapsack from './2024-07-leetcode-knapsack';
 import LeetcodeBinarySearch from './2024-08-leetcode-binary-search';
 import LeetcodeDP from './2026-04-leetcode-dp';
 import BuildingClaudeCodeSkills from './2026-04-building-claude-code-skills';
+import KafkaSystemDesign from './2026-05-kafka-system-design';
 
 /**
  * Central metadata registry for all blog posts
@@ -156,6 +157,20 @@ export const blogPosts: BlogPostRegistry = {
     published: true,
     featured: true,
     component: BuildingClaudeCodeSkills,
+  },
+  'kafka-system-design': {
+    id: '2026-05-kafka-system-design',
+    slug: 'kafka-system-design',
+    title: 'Kafka for System Design Interviews',
+    description: 'Everything you need to know about Kafka for system design interviews: CAP theorem, trade-offs, failure modes, edge cases, and the interview sound bites that matter.',
+    date: '2026-05-10T00:00:00Z',
+    author: 'Ziyang Li',
+    category: 'Tech',
+    tags: ['Kafka', 'System Design', 'Distributed Systems', 'Interviews'],
+    readTime: 15,
+    published: true,
+    featured: true,
+    component: KafkaSystemDesign,
   },
 };
 

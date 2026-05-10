@@ -88,6 +88,18 @@ This is a React-based personal website for ziyang.li with the following key arch
 
 ## Writing Blog Posts
 
+### Voice and Tone
+
+New posts must match the existing blog voice:
+- **Neutral, explanatory tone** - not casual or punchy
+- **"We" perspective** - tutorial-style, guiding the reader
+- **Structure**: concept → code → explanation
+- **No bold callouts** like "Interview trap:" or "Pro tip:"
+- **No interview-prep framing** or "sound bites" sections
+- Let the content speak for itself without meta-commentary
+
+Read existing posts in `ziyangli/src/posts/` before writing to match the style.
+
 ### Quick Start
 
 1. Create post file: `ziyangli/src/posts/YYYY-MM-post-slug.tsx`
