@@ -516,6 +516,14 @@ input:checked + .slider:before {
     margin-bottom: 0.5rem;
 }
 
+.blog-cover-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
 .blog-post-tags {
     display: flex;
     flex-wrap: wrap;
@@ -559,6 +567,25 @@ input:checked + .slider:before {
     height: auto;
     border-radius: 8px;
     margin: 1.25rem 0;
+}
+
+.blog-post-content figure.blog-image {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.blog-post-content figure.blog-image img {
+    margin: 0;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.blog-post-content figure.blog-image figcaption {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    opacity: 0.7;
+    font-style: italic;
 }
 
 .blog-post-content blockquote {

@@ -32,6 +32,14 @@ const BlogPostPage: React.FC = () => {
           {post.readTime && <span> • {post.readTime} min read</span>}
           {post.author && <span> • By {post.author}</span>}
         </div>
+
+        {post.coverImage && (
+          <img
+            src={post.coverImage}
+            alt={`Cover for ${post.title}`}
+            className="blog-cover-image"
+          />
+        )}
       </header>
 
       <div className="blog-post-content">

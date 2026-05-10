@@ -86,6 +86,149 @@ This is a React-based personal website for ziyang.li with the following key arch
 - Dark mode as default theme preference
 - Simple single-page layout without routing
 
+## Writing Blog Posts
+
+### Quick Start
+
+1. Create post file: `ziyangli/src/posts/YYYY-MM-post-slug.tsx`
+2. Register in: `ziyangli/src/posts/index.ts`
+3. Run `npm start` to preview
+
+### Step 1: Create the Post File
+
+Create a new TSX file in `ziyangli/src/posts/` with naming convention `YYYY-MM-descriptive-name.tsx`:
+
+```tsx
+import React from 'react';
+import CodeBlock from '../components/blog/CodeBlock';
+import BlogImage from '../components/blog/BlogImage';
+
+const MyNewPost: React.FC = () => {
+  return (
+    <>
+      <p>Introduction paragraph...</p>
+
+      <h2>Section Heading</h2>
+      <p>Section content...</p>
+
+      {/* Code blocks with syntax highlighting */}
+      <CodeBlock language="typescript">
+{`const example = "code here";`}
+      </CodeBlock>
+
+      {/* Images with optional caption */}
+      <BlogImage
+        src="/images/blog/my-image.png"
+        alt="Description"
+        caption="Optional caption"
+      />
+
+      <h2>Another Section</h2>
+      <ul>
+        <li>Bullet points work</li>
+        <li>As do numbered lists</li>
+      </ul>
+
+      <blockquote>
+        Blockquotes for emphasis or citations.
+      </blockquote>
+    </>
+  );
+};
+
+export default MyNewPost;
+```
+
+### Step 2: Register the Post
+
+Add import and metadata to `ziyangli/src/posts/index.ts`:
+
+```tsx
+// Add import at top
+import MyNewPost from './2026-05-my-new-post';
+
+// Add to blogPosts registry
+'my-new-post': {
+  id: '2026-05-my-new-post',
+  slug: 'my-new-post',              // URL: /blog/my-new-post
+  title: 'My Post Title',
+  description: 'Brief description for previews and SEO.',
+  date: '2026-05-10T00:00:00Z',     // ISO date
+  author: 'Ziyang Li',
+  category: 'Tech',                  // Tech, Leetcode, AI, Personal
+  tags: ['React', 'Tutorial'],
+  readTime: 10,                      // minutes
+  published: true,
+  featured: false,                   // show on homepage
+  coverImage: '/images/blog/cover.jpg',  // optional
+  component: MyNewPost,
+},
+```
+
+### Step 3: Adding Images
+
+Images go in `ziyangli/public/images/blog/`:
+
+```
+ziyangli/public/images/blog/
+├── my-post-screenshot.png
+├── diagram.svg
+└── cover-image.jpg
+```
+
+Reference in posts with absolute path:
+```tsx
+<BlogImage
+  src="/images/blog/my-post-screenshot.png"
+  alt="Screenshot showing the feature"
+  caption="The new dashboard layout"
+/>
+```
+
+Or use standard img tag:
+```tsx
+<img src="/images/blog/diagram.svg" alt="Architecture diagram" />
+```
+
+### Available Components
+
+| Component | Usage |
+|-----------|-------|
+| `<CodeBlock language="tsx">` | Syntax-highlighted code blocks |
+| `<BlogImage src="" alt="">` | Images with optional caption |
+| `<h2>`, `<h3>` | Section headings |
+| `<p>` | Paragraphs |
+| `<ul>`, `<ol>`, `<li>` | Lists |
+| `<blockquote>` | Block quotes |
+| `<code>` | Inline code |
+| `<a href="">` | Links |
+
+### Supported Code Languages
+
+CodeBlock supports: `typescript`, `tsx`, `javascript`, `jsx`, `python`, `bash`, `json`, `css`, `html`, `markdown`, `plaintext`, `go`, `rust`, `sql`
+
+### Categories
+
+Current categories (defined order): `Personal`, `AI`, `Leetcode`, `Tech`
+
+### Metadata Fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `id` | Yes | Unique ID matching filename |
+| `slug` | Yes | URL path (kebab-case) |
+| `title` | Yes | Display title |
+| `description` | Yes | Preview text, SEO |
+| `date` | Yes | ISO date string |
+| `author` | Yes | Author name |
+| `component` | Yes | React component reference |
+| `category` | No | Main category |
+| `tags` | No | Array of tags |
+| `readTime` | No | Minutes to read |
+| `published` | No | Default true, set false for drafts |
+| `featured` | No | Show on homepage |
+| `coverImage` | No | Path to cover image |
+
 ### TODO
 
 #### Core Infrastructure
