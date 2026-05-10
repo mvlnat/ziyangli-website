@@ -178,6 +178,38 @@ const KafkaSystemDesign: React.FC = () => {
         systems, we need idempotent operations or distributed transactions.
       </p>
 
+      <h3>Transactions</h3>
+      <p>
+        Kafka transactions enable atomic writes across multiple partitions and topics.
+        A producer begins a transaction, sends messages to various partitions, and then
+        commits or aborts the entire batch. Either all messages are visible to consumers
+        or none are.
+      </p>
+      <p>
+        Transactions also support atomic read-process-write patterns. A consumer reads
+        from one topic, processes the data, produces to another topic, and commits the
+        consumer offsets—all within a single transaction. If anything fails, the entire
+        operation rolls back.
+      </p>
+      <p>
+        The mechanism uses a <code>transactional.id</code> that persists across producer
+        restarts. A transaction coordinator tracks state in the <code>__transaction_state</code>
+        topic using a two-phase commit protocol. When a producer with the same
+        transactional.id starts, Kafka fences out any previous instance (zombie fencing)
+        to prevent duplicate processing.
+      </p>
+      <p>
+        Consumers must set <code>isolation.level=read_committed</code> to only see
+        committed messages. With the default <code>read_uncommitted</code>, consumers
+        see all messages including those from aborted transactions.
+      </p>
+      <p>
+        Transactions add latency due to coordinator communication and two-phase commit.
+        Throughput is lower than non-transactional producers. The added complexity makes
+        debugging harder. For many use cases, at-least-once with idempotent consumers
+        provides sufficient guarantees without the overhead.
+      </p>
+
       <h2>Failure Modes</h2>
 
       <h3>Broker Failure</h3>
@@ -286,14 +318,13 @@ const KafkaSystemDesign: React.FC = () => {
 
       <h3>Producer Acknowledgments</h3>
       <p>
-        The <code>acks</code> setting controls durability guarantees.
-        With <code>acks=0</code>, the producer does not wait for acknowledgment,
-        providing maximum throughput but risking data loss.
-        With <code>acks=1</code>, the producer waits for the leader to acknowledge,
-        balancing throughput and durability but risking loss if the leader fails
-        before replication.
-        With <code>acks=all</code>, the producer waits for all in-sync replicas to
-        acknowledge, providing the strongest durability at the cost of latency.
+        The <code>acks</code> setting controls how many replicas must acknowledge
+        a write before the producer considers it successful. As discussed in the
+        CAP section, <code>acks=0</code> provides maximum throughput with no
+        durability, <code>acks=1</code> balances throughput and durability, and
+        <code>acks=all</code> provides the strongest durability at the cost of
+        latency. When tuning producers, choose based on whether data loss is
+        acceptable for the specific use case.
       </p>
 
       <h2>Consumer Assignment Strategies</h2>
