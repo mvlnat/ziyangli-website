@@ -3,29 +3,33 @@ import React from 'react';
 const About: React.FC = () => {
   return (
     <div className="about-page">
-      <h1>About</h1>
+      <header className="about-header">
+        <h1>About</h1>
+        <p>A little context on who I am and what this site is for</p>
+      </header>
 
       <section>
         <h2>About Me</h2>
         <p>
-          I'm Ziyang Li, a software developer passionate about building
-          elegant solutions to complex problems.
+          I'm Ziyang Li, a software developer focused on building clear,
+          reliable web applications and learning systems.
         </p>
         <p>
-          I enjoy working with modern web technologies and exploring new ways
-          to create interactive experiences on the web.
+          I care about practical product engineering: shaping an interface,
+          wiring the backend, deploying it, and writing down the lessons so
+          the work compounds.
         </p>
       </section>
 
       <section>
         <h2>About This Site</h2>
         <p>
-          This site is built with React, TypeScript, and deployed on GitHub Pages.
-          It's a personal space for sharing thoughts, tutorials, and experiments.
+          This site is my public home base. It collects shipped projects,
+          technical writing, experiments, and the decisions behind them.
         </p>
         <p>
-          Each blog post is a custom React component, allowing for maximum
-          flexibility and creativity in content presentation.
+          It is built with React and TypeScript, with each post treated as a
+          flexible page rather than a fixed template.
         </p>
       </section>
     </div>
