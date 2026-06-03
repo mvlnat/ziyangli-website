@@ -18,6 +18,14 @@ const BlogPostPage: React.FC = () => {
 
   const PostComponent = post.component;
 
+  if (post.presentationMode) {
+    return (
+      <article className="blog-post-page blog-post-page-presentation" aria-label={post.title}>
+        <PostComponent />
+      </article>
+    );
+  }
+
   return (
     <article className="blog-post-page">
       <header className="blog-post-header">

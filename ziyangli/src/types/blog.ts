@@ -20,6 +20,7 @@ export interface BlogPostMetadata {
   readTime?: number;             // Estimated read time in minutes
   published?: boolean;           // Draft vs published (default: true)
   featured?: boolean;            // Featured post flag (for homepage)
+  presentationMode?: boolean;     // Render as a full-screen web video presentation
 
   // Component reference
   component: React.ComponentType; // The actual React component for the post

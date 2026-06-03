@@ -12,6 +12,7 @@ import LeetcodeBinarySearch from './2024-08-leetcode-binary-search';
 import LeetcodeDP from './2026-04-leetcode-dp';
 import BuildingClaudeCodeSkills from './2026-04-building-claude-code-skills';
 import KafkaSystemDesign from './2026-05-kafka-system-design';
+import WebVideoBlogDemo from './2026-06-web-video-blog-demo';
 
 /**
  * Central metadata registry for all blog posts
@@ -171,6 +172,21 @@ export const blogPosts: BlogPostRegistry = {
     published: true,
     featured: true,
     component: KafkaSystemDesign,
+  },
+  'web-video-blog-demo': {
+    id: '2026-06-web-video-blog-demo',
+    slug: 'web-video-blog-demo',
+    title: 'Demo: A Web Video Style Blog Page',
+    description: 'A click-driven demo blog post that follows the local SKILL.md method for turning written material into a screen-by-screen web presentation.',
+    date: '2026-06-02T00:00:00Z',
+    author: 'Ziyang Li',
+    category: 'AI',
+    tags: ['Web Video', 'React', 'Skills', 'Blog'],
+    readTime: 4,
+    published: true,
+    featured: true,
+    presentationMode: true,
+    component: WebVideoBlogDemo,
   },
 };
 
