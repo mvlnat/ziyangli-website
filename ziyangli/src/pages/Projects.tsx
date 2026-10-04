@@ -37,6 +37,7 @@ const Projects: React.FC = () => {
             <span className="project-domain">{project.domain}</span>
             <h3>{project.name}</h3>
             <p>{project.description}</p>
+            <span className="project-visit">Open project ↗</span>
           </a>
         ))}
       </div>

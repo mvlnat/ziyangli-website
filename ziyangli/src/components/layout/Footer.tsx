@@ -5,7 +5,8 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="site-footer">
-      <p>&copy; {currentYear} Ziyang Li. All rights reserved.</p>
+      <p>&copy; {currentYear} Ziyang Li</p>
+      <p>Built with care. Shared in public.</p>
     </footer>
   );
 };

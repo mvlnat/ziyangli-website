@@ -11,8 +11,8 @@ const DarkModeToggle: React.FC<DarkModeToggleProps> = ({
 }) => {
   return (
     <label className={`switch ${isDarkMode ? "dark-mode" : "light-mode"}`}>
-      <input type="checkbox" checked={isDarkMode} onChange={toggleDarkMode} />
-      <span className="slider round"></span>
+      <input type="checkbox" aria-label="Evening theme" role="switch" checked={isDarkMode} onChange={toggleDarkMode} />
+      <span className="slider round" aria-hidden="true"></span>
     </label>
   );
 };

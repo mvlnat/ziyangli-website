@@ -50,7 +50,7 @@ const BlogIndex: React.FC = () => {
       </div>
 
       <div className="blog-results">
-        <p className="results-count">
+        <p className="results-count" role="status" aria-live="polite">
           {filteredPosts.length} {filteredPosts.length === 1 ? 'post' : 'posts'}
         </p>
 

@@ -203,7 +203,7 @@ export const getAllPosts = (): BlogPostMetadata[] => {
  * Get a single post by its slug
  */
 export const getPostBySlug = (slug: string): BlogPostMetadata | undefined => {
-  return blogPosts[slug];
+  return Object.prototype.hasOwnProperty.call(blogPosts, slug) ? blogPosts[slug] : undefined;
 };
 
 /**

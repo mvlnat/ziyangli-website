@@ -4,17 +4,21 @@ import { Link, useLocation } from 'react-router-dom';
 const Navigation: React.FC = () => {
   const location = useLocation();
 
-  const isActive = (path: string) => {
-    return location.pathname === path ? 'active' : '';
-  };
-
   return (
     <nav className="main-navigation" role="navigation" aria-label="Main navigation">
       <ul>
-        <li><Link to="/" className={isActive('/')}>Home</Link></li>
-        <li><Link to="/projects" className={isActive('/projects')}>Projects</Link></li>
-        <li><Link to="/blog" className={isActive('/blog')}>Blog</Link></li>
-        <li><Link to="/about" className={isActive('/about')}>About</Link></li>
+        {[
+          { path: '/', label: 'Home' },
+          { path: '/projects', label: 'Projects' },
+          { path: '/blog', label: 'Blog' },
+          { path: '/about', label: 'About' },
+        ].map((item, index) => {
+          const active = location.pathname === item.path ||
+            (item.path !== '/' && location.pathname.startsWith(`${item.path}/`));
+          return <li key={item.path}><Link to={item.path} className={active ? 'active' : ''} aria-current={active ? 'page' : undefined}>
+            <span className="nav-number" aria-hidden="true">0{index + 1}</span>{item.label}
+          </Link></li>;
+        })}
       </ul>
     </nav>
   );

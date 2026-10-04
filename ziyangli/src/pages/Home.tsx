@@ -36,12 +36,13 @@ const Home: React.FC = () => {
         <div className="hero-portrait" aria-label="Portrait of Ziyang Li">
           <img src={`${process.env.PUBLIC_URL}/images/blog/ziyang.png`} alt="Ziyang Li" />
           <div className="portrait-caption">
-            <span>Currently public</span>
+            <span>From the notebook</span>
             <strong>Building, writing, learning</strong>
           </div>
         </div>
       </section>
 
+      <div className="section-label">On my desk</div>
       <section className="signal-grid" aria-label="What this site highlights">
         <article>
           <span>01</span>

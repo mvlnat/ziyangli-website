@@ -12,15 +12,22 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  // Initialize from localStorage or default to dark mode
+  // Restore the saved desk finish; use daylight for a first visit.
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('darkMode');
-    return saved !== null ? JSON.parse(saved) : true; // Default to dark mode
+    try {
+      return localStorage.getItem('darkMode') === 'true';
+    } catch {
+      return false;
+    }
   });
 
   // Persist theme preference to localStorage
   useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+    try {
+      localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+    } catch {
+      // The theme still works when browser storage is unavailable.
+    }
   }, [isDarkMode]);
 
   const toggleDarkMode = () => {

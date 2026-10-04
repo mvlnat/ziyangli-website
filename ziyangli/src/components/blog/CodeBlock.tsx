@@ -28,7 +28,9 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ children, language = 'typescript'
         lineHeight: '1.5',
         overflow: 'auto',
         fontWeight: 500,
-        backgroundColor: isDarkMode ? '#1e1e1e' : '#f5f5f5',
+        backgroundColor: isDarkMode ? '#25231e' : '#fff9ea',
+        border: '1px solid var(--rule)',
+        boxShadow: 'inset 0 2px 5px #0002, 0 1px var(--highlight)',
       }}
       codeTagProps={{
         style: {

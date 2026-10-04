@@ -70,7 +70,8 @@ function useStepper(totalSteps: number) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.target instanceof HTMLInputElement) {
+      if (event.target instanceof HTMLElement &&
+          event.target.closest('button, a, input, textarea, select, [contenteditable]')) {
         return;
       }
 
@@ -155,19 +156,19 @@ function ProgressBar({
         >
           <span className="wvbd-pb-num">01</span>
           <span className="wvbd-pb-title">{CHAPTER.title}</span>
-          <span className="wvbd-pb-pips" aria-label="Jump to step">
-            {CHAPTER.narrations.map((_, index) => (
-              <span
-                key={index}
-                className={`wvbd-pb-pip ${index <= step ? 'wvbd-pb-pip-on' : ''}`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onJumpStep(index);
-                }}
-              />
-            ))}
-          </span>
         </button>
+        <div className="wvbd-pb-pips" role="group" aria-label="Jump to step">
+          {CHAPTER.narrations.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              aria-label={`Go to step ${index + 1}`}
+              aria-current={index === step ? 'step' : undefined}
+              className={`wvbd-pb-pip ${index <= step ? 'wvbd-pb-pip-on' : ''}`}
+              onClick={() => onJumpStep(index)}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

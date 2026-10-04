@@ -15,6 +15,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
     <div className="category-filter">
       <button
         className={selected === null ? 'active' : ''}
+        aria-pressed={selected === null}
         onClick={() => onChange(null)}
       >
         All
@@ -23,6 +24,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
         <button
           key={category}
           className={selected === category ? 'active' : ''}
+          aria-pressed={selected === category}
           onClick={() => onChange(category)}
         >
           {category}
