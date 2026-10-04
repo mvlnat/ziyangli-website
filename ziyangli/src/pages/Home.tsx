@@ -34,7 +34,14 @@ const Home: React.FC = () => {
         </div>
 
         <div className="hero-portrait" aria-label="Portrait of Ziyang Li">
-          <img src={`${process.env.PUBLIC_URL}/images/blog/ziyang.png`} alt="Ziyang Li" />
+          <img
+            src={`${process.env.PUBLIC_URL}/images/blog/ziyang.webp`}
+            srcSet={`${process.env.PUBLIC_URL}/images/blog/ziyang-400.webp 400w, ${process.env.PUBLIC_URL}/images/blog/ziyang.webp 800w`}
+            sizes="(max-width: 560px) 300px, (max-width: 1000px) 35vw, 350px"
+            width={800}
+            height={1067}
+            alt="Ziyang Li"
+          />
           <div className="portrait-caption">
             <span>From the notebook</span>
             <strong>Building, writing, learning</strong>

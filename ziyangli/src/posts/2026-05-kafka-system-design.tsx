@@ -11,8 +11,10 @@ const KafkaSystemDesign: React.FC = () => {
       </p>
 
       <BlogImage
-        src="/images/blog/kafka.png"
+        src="/images/blog/kafka.webp"
         alt="Apache Kafka architecture"
+        intrinsicWidth={1536}
+        intrinsicHeight={1024}
       />
 
       <h2>What Kafka Is</h2>
