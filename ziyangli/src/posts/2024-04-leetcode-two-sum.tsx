@@ -224,7 +224,8 @@ Output: [[-1,-1,2],[-1,0,1]]`}
 
       <p>
         For Two Sum with indices, the hash map is optimal because we need O(1) lookups and
-        can't sort (sorting would lose the original positions). For Three Sum and beyond,
+        can preserve the original positions directly (sorting would require carrying indices
+        alongside values). For Three Sum and beyond,
         when we need values and want to avoid duplicates, sorting enables the two-pointer
         technique and makes duplicate detection straightforward.
       </p>

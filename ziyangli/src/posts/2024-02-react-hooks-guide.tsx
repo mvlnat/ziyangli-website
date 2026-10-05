@@ -23,7 +23,7 @@ const ReactHooksGuide: React.FC = () => {
 {`const [count, setCount] = useState(0);
 const [name, setName] = useState('');
 
-// Functional updates for better performance
+// Functional updates read the latest state
 setCount(prev => prev + 1);`}
       </CodeBlock>
 
@@ -101,7 +101,7 @@ function reducer(state, action) {
       <CodeBlock language="typescript">
 {`const sortedList = useMemo(() => {
   // Expensive operation
-  return items.sort((a, b) => a.value - b.value);
+  return [...items].sort((a, b) => a.value - b.value);
 }, [items]);`}
       </CodeBlock>
 
@@ -184,17 +184,28 @@ countRef.current += 1;`}
       </p>
 
       <CodeBlock language="typescript">
-{`function UserProfile({ userId }) {
-  // use() can read promises directly
-  const user = use(fetchUser(userId));
+{`import { Suspense, use } from 'react';
+
+function UserProfile({ userPromise }) {
+  // Reuse a stable promise from a cache or a Server Component.
+  const user = use(userPromise);
 
   return <div>{user.name}</div>;
-}`}
+}
+
+// userPromise is created outside rendering and remains stable across retries.
+<Suspense fallback={<p>Loading...</p>}>
+  <UserProfile userPromise={userPromise} />
+</Suspense>`}
       </CodeBlock>
 
       <p>
         For most data fetching scenarios, prefer <code>use()</code> with Suspense,
         Server Components, or libraries like TanStack Query over useEffect.
+        Promises passed to <code>use()</code> must remain stable across renders;
+        creating a new fetch promise during rendering causes repeated suspension.
+        See the <a href="https://react.dev/reference/react/use">React use() reference</a>
+        {' '}for caching and Suspense requirements.
       </p>
 
       <h2>Best Practices</h2>
@@ -216,7 +227,7 @@ useEffect(() => {
 }, [data]);
 
 // ✅ Use useMemo instead
-const sorted = useMemo(() => data.sort(), [data]);
+const sorted = useMemo(() => [...data].sort(), [data]);
 
 // ❌ Don't wrap every function in useCallback
 const handleClick = useCallback(() => {

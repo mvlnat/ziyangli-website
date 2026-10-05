@@ -62,6 +62,9 @@ const result = await Promise.race([
       <CodeBlock language="typescript">
 {`async function fetchUser(id: string): Promise<User> {
   const response = await fetch(\`/api/users/\${id}\`);
+  if (!response.ok) {
+    throw new Error(\`HTTP error! status: \${response.status}\`);
+  }
   const data = await response.json();
   return data;
 }
@@ -86,7 +89,7 @@ async function getUsers() {
   constructor(
     message: string,
     public statusCode: number,
-    public response?: any
+    public response?: unknown
   ) {
     super(message);
     this.name = 'ApiError';
@@ -101,7 +104,7 @@ async function fetchUserSafe(id: string): Promise<User> {
       throw new ApiError(
         'Failed to fetch user',
         response.status,
-        await response.json()
+        await response.json().catch(() => undefined)
       );
     }
 
@@ -128,7 +131,7 @@ async function fetchUserSafe(id: string): Promise<User> {
 
 async function fetchUserResult(id: string): Promise<Result<User, ApiError>> {
   try {
-    const user = await fetchUser(id);
+    const user = await fetchUserSafe(id);
     return { success: true, data: user };
   } catch (error) {
     return {
@@ -150,6 +153,8 @@ if (result.success) {
 
       <p>
         Generics make async utilities reusable across different types.
+        A type assertion describes the expected JSON shape; runtime validation is needed
+        when responses cannot be trusted to match that shape.
       </p>
 
       <CodeBlock language="typescript">
@@ -181,6 +186,10 @@ const post = await fetchJson<Post>('/api/posts/1');
   maxAttempts: number = 3,
   delay: number = 1000
 ): Promise<T> {
+  if (!Number.isInteger(maxAttempts) || maxAttempts < 1) {
+    throw new Error('maxAttempts must be a positive integer');
+  }
+
   let lastError: Error;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -237,7 +246,10 @@ for await (const posts of fetchPages<Post>('/api/posts')) {
       </p>
 
       <CodeBlock language="typescript">
-{`type Awaited<T> = T extends Promise<infer U> ? U : T;
+{`// Built-in Awaited recursively unwraps promises and thenables.
+type NestedPromise = Promise<Promise<User>>;
+type UnwrappedNested = Awaited<NestedPromise>;
+// User
 
 type UserPromise = Promise<User>;
 type UnwrappedUser = Awaited<UserPromise>;
@@ -259,26 +271,37 @@ type UserType = AsyncReturnType<typeof getUser>;
 
       <p>
         Debouncing an async function requires careful typing to preserve the parameter
-        and return types.
+        and return types. All calls within one debounce window resolve to the final
+        call's result, or reject together if that request fails.
       </p>
 
       <CodeBlock language="typescript">
 {`function debounceAsync<T extends (...args: any[]) => Promise<any>>(
   fn: T,
   delay: number
-): (...args: Parameters<T>) => Promise<ReturnType<T>> {
-  let timeoutId: NodeJS.Timeout | null = null;
+): (...args: Parameters<T>) => Promise<Awaited<ReturnType<T>>> {
+  type Value = Awaited<ReturnType<T>>;
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let waiting: Array<{
+    resolve: (value: Value) => void;
+    reject: (error: unknown) => void;
+  }> = [];
 
   return (...args: Parameters<T>) => {
-    return new Promise((resolve, reject) => {
-      if (timeoutId) clearTimeout(timeoutId);
+    return new Promise<Value>((resolve, reject) => {
+      waiting.push({ resolve, reject });
+      if (timeoutId !== undefined) clearTimeout(timeoutId);
 
       timeoutId = setTimeout(async () => {
+        timeoutId = undefined;
+        // Calls during this request belong to the next batch.
+        const batch = waiting;
+        waiting = [];
         try {
           const result = await fn(...args);
-          resolve(result);
+          batch.forEach(caller => caller.resolve(result));
         } catch (error) {
-          reject(error);
+          batch.forEach(caller => caller.reject(error));
         }
       }, delay);
     });
@@ -302,12 +325,15 @@ const debouncedSearch = debounceAsync(
   promise: Promise<T>,
   timeoutMs: number
 ): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error('Timeout')), timeoutMs)
-    ),
-  ]);
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<T>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('Timeout')), timeoutMs);
+  });
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId !== undefined) clearTimeout(timeoutId);
+  }
 }
 
 const user = await withTimeout(fetchUser('123'), 5000);`}
@@ -319,10 +345,14 @@ const user = await withTimeout(fetchUser('123'), 5000);`}
 
       <CodeBlock language="typescript">
 {`class AsyncQueue<T> {
-  private queue: Array<() => Promise<T>> = [];
+  private queue: Array<() => Promise<void>> = [];
   private running = 0;
 
-  constructor(private concurrency: number = 3) {}
+  constructor(private concurrency: number = 3) {
+    if (!Number.isInteger(concurrency) || concurrency < 1) {
+      throw new Error('concurrency must be a positive integer');
+    }
+  }
 
   async add(fn: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {

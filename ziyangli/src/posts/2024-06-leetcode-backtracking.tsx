@@ -121,7 +121,7 @@ const LeetcodeBacktracking: React.FC = () => {
       <h2>Combination Sum</h2>
 
       <p>
-        Given an array of distinct integers and a target, find all combinations where the
+        Given an array of distinct positive integers and a target, find all combinations where the
         numbers sum to target. Each number can be used unlimited times.
       </p>
 

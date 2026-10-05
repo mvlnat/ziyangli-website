@@ -26,6 +26,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build && echo ziyang.li > build/CNAME",
     "test": "react-scripts test",
+    "verify:examples": "node scripts/verify-post-examples.cjs",
     "eject": "react-scripts eject",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",

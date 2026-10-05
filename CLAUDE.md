@@ -8,6 +8,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `npm start` - Start development server at ziyangli/
 - `npm run build` - Build production version
 - `npm test` - Run Jest tests
+- `npm test -- --watchAll=false --runInBand` - Run the complete regression suite once
+- `npm run verify:examples` - Compile and exercise the published async utilities
 - `npm run serve` - Serve built static files locally
 
 ### Deployment
@@ -30,7 +32,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Development Best Practices
 
 ### Testing Philosophy
-- **Keep test infrastructure** (Jest, React Testing Library) for future use
+- **Keep test infrastructure** (Jest, React Testing Library) for regression checks
 - **Don't write unit tests** for simple components (not worth the overhead)
 - **DO test the build process** before every deployment
 - If complex interactive features are added later (games, calculators, etc.), add tests for those specific features
@@ -70,7 +72,7 @@ This is a React-based personal website for ziyang.li with the following key arch
 
 ### Key Components
 - **App.tsx**: Main application - simple single-page personal website
-- **DarkModeToggle**: Theme switching functionality (defaults to dark mode)
+- **DarkModeToggle**: Theme switching functionality (defaults to daylight and restores saved preferences)
 - **LinkedInButton**: Social media integration component
 
 ### Build Process
@@ -83,8 +85,9 @@ This is a React-based personal website for ziyang.li with the following key arch
 
 ### Notable Patterns
 - Age calculation based on hardcoded birthdate (2000-08-28)
-- Dark mode as default theme preference
-- Simple single-page layout without routing
+- Daylight as the default theme preference
+- HashRouter routes for home, projects, blog, individual articles, about, and 404
+- Presentation posts use a full-screen layout with keyboard and step controls
 
 ## Writing Blog Posts
 
@@ -162,7 +165,7 @@ import MyNewPost from './2026-05-my-new-post';
 // Add to blogPosts registry
 'my-new-post': {
   id: '2026-05-my-new-post',
-  slug: 'my-new-post',              // URL: /blog/my-new-post
+  slug: 'my-new-post',              // URL: /#/blog/my-new-post
   title: 'My Post Title',
   description: 'Brief description for previews and SEO.',
   date: '2026-05-10T00:00:00Z',     // ISO date
@@ -242,11 +245,6 @@ Current categories (defined order): `Personal`, `AI`, `Leetcode`, `Tech`
 | `coverImage` | No | Path to cover image |
 
 ### TODO
-
-#### Core Infrastructure
-- implement routing and navigation
-- new folder under `ziyangli/src/` called `pages`
-- it will contain React pages for different sections of the website
 
 #### What Actually Matters (Priority)
 

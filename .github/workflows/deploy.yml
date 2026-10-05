@@ -24,7 +24,13 @@ jobs:
           
       - name: Install dependencies
         working-directory: ./ziyangli
-        run: npm install
+        run: npm ci
+
+      - name: Test website and published examples
+        working-directory: ./ziyangli
+        run: |
+          npm test -- --watchAll=false --runInBand
+          npm run verify:examples
         
       - name: Build website
         working-directory: ./ziyangli

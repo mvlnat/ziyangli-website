@@ -17,21 +17,24 @@ const BuildingClaudeCodeSkills: React.FC = () => {
       <h2>What is a Skill?</h2>
 
       <p>
-        A skill is a markdown file in your <code>~/.config/claude/skills/</code> directory. The
-        filename becomes the command name. A file called <code>commit.md</code> creates the
-        <code>/commit</code> command. The file contains instructions that Claude follows when
-        you invoke the skill.
+        A personal skill lives in <code>~/.claude/skills/&lt;skill-name&gt;/SKILL.md</code>.
+        A project skill uses <code>.claude/skills/&lt;skill-name&gt;/SKILL.md</code>.
+        The directory name, or the frontmatter name when provided, becomes the command name.
+        For example, <code>commit/SKILL.md</code> creates <code>/commit</code>.
       </p>
 
       <CodeBlock language="plaintext">
-{`~/.config/claude/skills/
-├── commit.md
-├── review-pr.md
-└── refactor.md`}
+{`~/.claude/skills/
+├── commit/
+│   └── SKILL.md
+├── review-pr/
+│   └── SKILL.md
+└── refactor/
+    └── SKILL.md`}
       </CodeBlock>
 
       <p>
-        Skills have access to the full conversation context and all of Claude's tools. They can
+        Skills run with conversation context and tools allowed by the session's permissions. They can
         read files, run commands, search code, and make decisions based on what they find.
       </p>
 
@@ -39,7 +42,7 @@ const BuildingClaudeCodeSkills: React.FC = () => {
 
       <p>
         A skill file starts with metadata in YAML frontmatter, followed by markdown instructions.
-        The metadata defines the skill's name, description, and parameters. The instructions tell
+        The metadata defines the skill's name, description, and invocation options. The instructions tell
         Claude what to do.
       </p>
 
@@ -47,10 +50,8 @@ const BuildingClaudeCodeSkills: React.FC = () => {
 {`---
 name: commit
 description: Create a git commit with a well-formatted message
-args:
-  - name: message
-    description: Optional commit message
-    required: false
+argument-hint: "[message]"
+disable-model-invocation: true
 ---
 
 # Commit Skill
@@ -62,8 +63,8 @@ You are helping the user create a git commit.
 1. Run \`git status\` to see what files have changed
 2. Run \`git diff\` to see the actual changes
 3. Analyze the changes and create a descriptive commit message
-4. If the user provided a message in args, use that instead
-5. Stage all changes with \`git add .\`
+4. If $ARGUMENTS contains a commit message, use that instead
+5. Stage only the files intended for this commit; leave unrelated changes alone
 6. Commit with the message
 7. Show the user what was committed`}
       </CodeBlock>
@@ -77,25 +78,24 @@ You are helping the user create a git commit.
 
       <p>
         Skills can accept parameters. When you run <code>/review-pr 123</code>, the number 123
-        is passed as an argument. The skill defines what parameters it accepts in the frontmatter.
+        is available through <code>$ARGUMENTS</code>. An <code>argument-hint</code> documents
+        the expected input; the skill instructions must validate it.
       </p>
 
       <CodeBlock language="markdown">
 {`---
 name: review-pr
 description: Review a GitHub pull request
-args:
-  - name: pr_number
-    description: Pull request number to review
-    required: true
+argument-hint: "[pr-number]"
 ---
 
 # PR Review Skill
 
-Review pull request #{args.pr_number}.
+Review pull request $ARGUMENTS.
+If the argument is missing or is not a pull request number, ask for a valid number before running commands.
 
-1. Use \`gh pr view {args.pr_number}\` to get PR details
-2. Use \`gh pr diff {args.pr_number}\` to see changes
+1. Use \`gh pr view $ARGUMENTS\` to get PR details
+2. Use \`gh pr diff $ARGUMENTS\` to see changes
 3. Analyze the code for:
    - Correctness
    - Edge cases
@@ -105,8 +105,10 @@ Review pull request #{args.pr_number}.
       </CodeBlock>
 
       <p>
-        Parameters are accessed with <code>{`{args.parameter_name}`}</code> in the instructions.
-        Required parameters prevent the skill from running if they're missing.
+        Use <code>$ARGUMENTS</code> for the full input, or <code>$0</code> and
+        <code>$1</code> for positional arguments. These substitutions insert text into the
+        instructions. Validate inputs before using them in shell commands; argument hints
+        do not enforce required parameters.
       </p>
 
       <h2>Example: Test Runner</h2>
@@ -119,10 +121,7 @@ Review pull request #{args.pr_number}.
 {`---
 name: test
 description: Run tests for changed files
-args:
-  - name: pattern
-    description: Optional test pattern to match
-    required: false
+argument-hint: "[pattern]"
 ---
 
 # Test Runner
@@ -135,7 +134,7 @@ Run relevant tests for the current changes.
 2. For each modified file:
    - If it's a test file, note it
    - If it's a source file, find corresponding test files
-3. If user provided a pattern, use it to filter tests
+3. If $ARGUMENTS contains a pattern, use it to filter tests
 4. Run the tests using the project's test command
    - For Python: \`pytest <files>\`
    - For JavaScript: \`npm test -- <pattern>\`
@@ -164,18 +163,13 @@ Run relevant tests for the current changes.
 {`---
 name: refactor
 description: Refactor code following best practices
-args:
-  - name: file
-    description: File to refactor (optional, defaults to current context)
-    required: false
-  - name: focus
-    description: What to focus on (performance, readability, type-safety)
-    required: false
+argument-hint: "[file] [focus]"
 ---
 
 # Refactor Skill
 
-Refactor code to improve quality.
+Refactor code to improve quality. The target file is $0 and the focus is $1.
+If a placeholder is unchanged because its argument was omitted, use the conversation context.
 
 ## Process
 
@@ -221,15 +215,12 @@ Refactor code to improve quality.
 {`---
 name: doc
 description: Generate or update documentation
-args:
-  - name: target
-    description: What to document (function, file, api, readme)
-    required: false
+argument-hint: "[target]"
 ---
 
 # Documentation Skill
 
-Generate documentation from code.
+Generate documentation from code. The optional target is $ARGUMENTS.
 
 ## Steps
 
@@ -279,7 +270,7 @@ Generate documentation from code.
 
       <p>
         Make skills discoverable. Write good descriptions in the frontmatter. Users see these
-        when they run <code>/help</code>. A description like "Create git commit" is better than
+        in the slash-command menu. A description like "Create git commit" is better than
         "Commit helper."
       </p>
 
@@ -367,9 +358,9 @@ Fix the most recent error or issue discussed in this conversation.
       <h2>Limits</h2>
 
       <p>
-        Skills can't modify the filesystem directly—they instruct Claude to use tools. They
-        can't run in the background. They execute in the current conversation context and finish
-        when done.
+        Skill instructions describe work for Claude to perform with permitted tools. By default
+        they run in the current conversation; skills can also be configured to run in a
+        separate subagent context. A skill does not grant extra tool permissions.
       </p>
 
       <p>
@@ -382,6 +373,10 @@ Fix the most recent error or issue discussed in this conversation.
         The skill file is the interface. Clear instructions produce consistent results. Vague
         instructions produce unpredictable behavior. Write instructions you would want to follow
         yourself.
+      </p>
+      <p>
+        Refer to the <a href="https://code.claude.com/docs/en/skills">Claude Code skills documentation</a>
+        {' '}for supported locations, frontmatter fields, and argument substitutions.
       </p>
     </>
   );

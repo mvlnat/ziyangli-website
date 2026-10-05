@@ -29,8 +29,8 @@ const KafkaSystemDesign: React.FC = () => {
       <p>
         This distinction matters for understanding Kafka's behavior. Traditional message
         queues like RabbitMQ and SQS deliver messages to consumers and remove them. Kafka
-        works differently—messages remain in the log at their offset until retention
-        expires, regardless of whether anyone has read them.
+        works differently—reading a message does not remove it. Time or size retention
+        deletes old log segments; compacted topics instead keep the latest value for each key.
       </p>
       <p>
         This design means Kafka has no built-in dead letter queue (DLQ). In SQS, after N
@@ -39,8 +39,8 @@ const KafkaSystemDesign: React.FC = () => {
         processing succeeded or failed.
       </p>
       <p>
-        Kafka uses offset-based commits rather than per-message acknowledgments. We commit
-        "I've processed up to offset 42", not "message X succeeded, message Y failed". The
+        Kafka uses offset-based commits rather than per-message acknowledgments. After
+        processing offset 42, we commit 43: the next offset to read. The
         broker stores bytes while the consumer handles semantics. To implement a DLQ in
         Kafka, we catch failures in our consumer and publish to a separate dead letter
         topic. This gives us control over retry logic, failure categorization, and
@@ -71,8 +71,9 @@ const KafkaSystemDesign: React.FC = () => {
       </p>
       <p>
         For messages without a key, Kafka uses sticky partitioning (default since Kafka
-        2.4). The producer "sticks" to one partition until the batch is full or
-        <code>linger.ms</code> expires, then switches to another partition. This improves
+        2.4). The Java producer groups unkeyed records into batches on a partition before
+        choosing another partition. The exact switching policy depends on the client version.
+        This improves
         batching efficiency compared to the older round-robin approach, which cycled
         through partitions one message at a time and created many small batches.
       </p>
@@ -114,15 +115,17 @@ const KafkaSystemDesign: React.FC = () => {
         For stronger guarantees, we can store offsets ourselves in Redis, a database, or
         wherever our processing output goes. By writing the result and the offset in the
         same transaction, we get atomic "process + commit" semantics. On restart, we read
-        our last offset from the external store and seek to it. This approach provides
-        exactly-once semantics but adds complexity.
+        our next offset from the external store and seek to it. This can provide exactly-once
+        effects within that transactional store. Side effects in other systems need their
+        own coordination or idempotency, and partition ownership must be managed carefully.
       </p>
 
       <h2>CAP Theorem and Kafka</h2>
       <p>
-        Kafka is CP (Consistent + Partition Tolerant) by default. During a network
-        partition, Kafka chooses consistency over availability—it won't accept writes
-        if it can't guarantee replication.
+        Kafka's behavior during a network partition depends on leadership, replication,
+        and acknowledgment settings. A blanket CP label does not describe every configuration.
+        With <code>acks=all</code> and <code>min.insync.replicas=2</code>, writes fail when
+        fewer than two replicas are in sync, trading write availability for durability.
       </p>
       <p>
         We can tune this behavior. Setting <code>acks=1</code> (leader only) makes Kafka
@@ -162,7 +165,7 @@ const KafkaSystemDesign: React.FC = () => {
 
       <h3>Exactly-Once</h3>
       <p>
-        Data is neither lost nor duplicated. Kafka achieves this using Producer IDs
+        Producer idempotence deduplicates retries within a producer session. It uses Producer IDs
         (PID) and sequence numbers (SN). Each producer receives a unique PID, and each
         message sent to a partition gets an incrementing sequence number. The broker
         tracks the last sequence number for each <code>&lt;PID, partition&gt;</code> pair.
@@ -176,16 +179,17 @@ const KafkaSystemDesign: React.FC = () => {
       </p>
       <p>
         This mechanism requires <code>enable.idempotence=true</code>, which enforces
-        <code>acks=all</code>. For end-to-end exactly-once that includes external
-        systems, we need idempotent operations or distributed transactions.
+        <code>acks=all</code>. It does not by itself make consumer processing exactly-once
+        across crashes. Kafka transactions can atomically commit output records and consumed
+        offsets; external effects still need idempotency or transactional coordination.
       </p>
 
       <h3>Transactions</h3>
       <p>
         Kafka transactions enable atomic writes across multiple partitions and topics.
         A producer begins a transaction, sends messages to various partitions, and then
-        commits or aborts the entire batch. Either all messages are visible to consumers
-        or none are.
+        commits or aborts the entire batch. Consumers using <code>read_committed</code>
+        can read committed records and skip records from aborted transactions.
       </p>
       <p>
         Transactions also support atomic read-process-write patterns. A consumer reads
@@ -217,9 +221,10 @@ const KafkaSystemDesign: React.FC = () => {
       <h3>Broker Failure</h3>
       <p>
         Kafka replicates partitions across brokers. When a broker dies, leadership
-        transfers to a replica. Producers retry their requests and consumers rebalance.
-        With a proper replication factor of 3 or higher, a single broker failure causes
-        no data loss.
+        transfers to an eligible replica. Clients refresh metadata and retry requests;
+        consumer membership need not change just because a partition leader changed.
+        A replication factor of 3 alone does not guarantee durability: acknowledged data
+        can still be lost with <code>acks=1</code> or unsafe leader election.
       </p>
 
       <h3>Consumer Failure</h3>
@@ -231,16 +236,19 @@ const KafkaSystemDesign: React.FC = () => {
 
       <h3>Producer Failure</h3>
       <p>
-        If a producer crashes mid-send with <code>acks=0</code>, the message is lost.
-        With <code>acks=1</code> or higher, the producer retries on timeout. Idempotent
-        producers, available since Kafka 0.11, prevent duplicates from these retries.
+        If a producer crashes mid-send, an unacknowledged message may already be in the log
+        or may never have reached a broker. A running producer can retry transient failures,
+        but a crashed process cannot retry until the application recovers its pending work.
+        Idempotence deduplicates producer retries; replay after restart may need transactions
+        or an application-level deduplication key.
       </p>
 
       <h3>Network Partition</h3>
       <p>
-        If brokers can't communicate with the controller, affected partitions go offline.
-        Kafka chooses consistency—it won't serve potentially stale reads or accept writes
-        that can't be replicated.
+        A partition without an eligible leader cannot serve normal requests. An isolated
+        leader may lose leadership, and writes requiring more in-sync replicas can fail.
+        Other partitions may keep serving requests; the outcome depends on which brokers
+        and controller quorum members remain reachable.
       </p>
 
       <h3>Metadata Coordination</h3>
@@ -303,9 +311,10 @@ const KafkaSystemDesign: React.FC = () => {
       <p>
         The setting <code>max.in.flight.requests.per.connection</code> controls how
         many batches can be sent without waiting for acknowledgment. The default is 5.
-        Higher values increase throughput but can break ordering if a batch fails and
-        retries while later batches succeed. Setting it to 1 guarantees ordering but
-        reduces throughput.
+        With idempotence disabled, multiple in-flight requests can break ordering if a
+        batch fails and retries after a later batch succeeds. Idempotence preserves ordering
+        with up to five in-flight requests; setting the limit to one also avoids this
+        retry-ordering problem but reduces throughput.
       </p>
 
       <h3>Idempotent Producers</h3>
@@ -314,8 +323,8 @@ const KafkaSystemDesign: React.FC = () => {
         retries using sequence numbers. This maintains ordering even with multiple
         in-flight requests. Idempotence requires <code>acks=all</code>,
         <code>max.in.flight.requests.per.connection &lt;= 5</code>, and
-        <code>retries &gt; 0</code>. Kafka enforces these settings automatically
-        when idempotence is enabled.
+        <code>retries &gt; 0</code>. Compatible defaults support idempotence. Explicitly
+        enabling it with conflicting settings raises a configuration error.
       </p>
 
       <h3>Producer Acknowledgments</h3>
@@ -393,8 +402,9 @@ const KafkaSystemDesign: React.FC = () => {
 
       <h3>Rebalancing Storms</h3>
       <p>
-        Consumer joins and leaves trigger rebalances. During a rebalance, consumption
-        stops. Flaky consumers cause constant rebalancing, killing throughput. Solutions
+        Consumer joins and leaves trigger rebalances. Eager rebalancing pauses the group;
+        cooperative rebalancing limits disruption to reassigned partitions. Flaky consumers
+        can still cause repeated rebalancing and reduce throughput. Solutions
         include increasing <code>session.timeout.ms</code>, using static membership, or
         fixing the flaky consumers.
       </p>
@@ -409,14 +419,15 @@ const KafkaSystemDesign: React.FC = () => {
 
       <h3>Message Size</h3>
       <p>
-        The default maximum message size is 1MB. Large messages hurt performance and
+        Kafka has producer request and broker record-batch size limits, commonly around
+        1 MiB by default, rather than one universal per-message limit. Large messages hurt performance and
         memory usage. Solutions include compressing messages, storing payloads in S3 or
         blob storage and sending only a reference, or carefully increasing the limit.
       </p>
 
       <h2>When Not to Use Kafka</h2>
       <ul>
-        <li>Low message volume: Kafka is overkill for fewer than 1000 messages per second. SQS or RabbitMQ are simpler alternatives.</li>
+        <li>Low message volume with simple delivery needs: SQS or RabbitMQ may be simpler. There is no universal throughput threshold; replay, ordering, and stream processing requirements also matter.</li>
         <li>Request-response patterns: Kafka is asynchronous. HTTP or gRPC work better for synchronous communication.</li>
         <li>Strict ordering across all messages: This requires a single partition, creating a bottleneck. Consider redesigning the system.</li>
         <li>Small teams with simple needs: Kafka's operational complexity may not be worth it.</li>
@@ -424,12 +435,19 @@ const KafkaSystemDesign: React.FC = () => {
 
       <h2>Configuration Reference</h2>
       <ul>
-        <li>Replication factor: 3 (tolerates 1 broker failure)</li>
-        <li>min.insync.replicas: 2 (with RF=3, ensures 1 failure tolerance)</li>
-        <li>Partition count: Plan for 10-100x expected consumer count; difficult to change later</li>
+        <li>Replication factor: 3 is a common starting point; durability also depends on acknowledgment and leader-election settings</li>
+        <li>min.insync.replicas: 2 with RF=3 and acks=all allows writes after one replica fails, provided the other two stay in sync</li>
+        <li>Partition count: Plan from measured throughput, desired consumer parallelism, and broker overhead; increasing it changes key assignment</li>
         <li>Retention: 7 days default, tune based on replay requirements</li>
         <li>Consumer group: One per logical consumer application</li>
       </ul>
+      <p>
+        Configuration details are version and client dependent. Consult the Apache Kafka
+        {' '}<a href="https://kafka.apache.org/41/configuration/producer-configs/">producer configuration</a>,
+        {' '}<a href="https://kafka.apache.org/41/configuration/topic-configs/">topic configuration</a>, and
+        {' '}<a href="https://kafka.apache.org/41/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html">consumer API</a>
+        {' '}references for the settings discussed here.
+      </p>
     </>
   );
 };

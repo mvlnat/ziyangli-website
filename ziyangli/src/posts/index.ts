@@ -135,7 +135,7 @@ export const blogPosts: BlogPostRegistry = {
     id: '2026-04-leetcode-dp',
     slug: 'leetcode-dp',
     title: 'LeetCode Dynamic Programming: 1D, 2D, 3D DP Patterns',
-    description: 'Master dynamic programming with 1D DP (House Robber), 2D DP (Word Break), and 3D DP (Knight Probability). Learn recursive memoization vs tabulation, when to use each approach, and space optimization techniques.',
+    description: 'Master dynamic programming with 1D DP (House Robber and Word Break), 2D DP (Unique Paths), and 3D DP (Knight Probability). Learn recursive memoization vs tabulation and space optimization techniques.',
     date: '2026-04-11T00:00:00Z',
     author: 'Ziyang Li',
     category: 'Leetcode',
@@ -203,7 +203,9 @@ export const getAllPosts = (): BlogPostMetadata[] => {
  * Get a single post by its slug
  */
 export const getPostBySlug = (slug: string): BlogPostMetadata | undefined => {
-  return Object.prototype.hasOwnProperty.call(blogPosts, slug) ? blogPosts[slug] : undefined;
+  if (!Object.prototype.hasOwnProperty.call(blogPosts, slug)) return undefined;
+  const post = blogPosts[slug];
+  return post.published !== false ? post : undefined;
 };
 
 /**

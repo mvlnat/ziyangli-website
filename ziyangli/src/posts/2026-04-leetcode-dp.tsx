@@ -132,7 +132,34 @@ def rob_tab(nums):
     return prev1`}
       </CodeBlock>
 
-      <h2>2D DP: Word Break</h2>
+      <h2>2D DP: Unique Paths</h2>
+
+      <p>
+        A robot starts in the top-left corner of an m by n grid. It can move right or
+        down. How many paths reach the bottom-right corner? Each state is defined by
+        two variables: its row and column.
+      </p>
+
+      <CodeBlock language="python">
+{`def uniquePaths(m, n):
+    dp = [[1] * n for _ in range(m)]
+
+    for row in range(1, m):
+        for col in range(1, n):
+            dp[row][col] = dp[row - 1][col] + dp[row][col - 1]
+
+    return dp[m - 1][n - 1]
+
+# uniquePaths(3, 7) == 28`}
+      </CodeBlock>
+
+      <p>
+        The first row and column each have one path. Every other cell receives paths
+        from the cell above and the cell to its left. The table uses O(mn) time and
+        space; keeping one row reduces the space to O(n).
+      </p>
+
+      <h2>1D DP: Word Break</h2>
 
       <p>
         Given a string and a dictionary of words, determine if the string can be segmented into
@@ -146,10 +173,10 @@ Explanation: "leetcode" can be segmented as "leet code"`}
       </CodeBlock>
 
       <p>
-        This looks like it could be 1D, and it can be. But the natural recursive formulation
-        considers two dimensions: the starting position and the word we're trying to match.
-        The 1D version emerges when we realize we just need to track whether each position is
-        reachable.
+        Each subproblem is defined by one position in the string. In the recursive version,
+        that position starts the remaining substring. In tabulation, it marks the end of
+        the prefix we have already segmented. Trying several ending positions does not add
+        another dimension to the stored state.
       </p>
 
       <CodeBlock language="python">
@@ -202,14 +229,14 @@ def wordBreak_tab(s, wordDict):
 
       <p>
         A knight is placed on a chessboard and makes exactly k moves. Each move is chosen
-        uniformly at random from the valid moves. What's the probability the knight stays on
-        the board after k moves?
+        uniformly at random from all eight possible knight moves, including moves that leave
+        the board. What's the probability the knight stays on the board after k moves?
       </p>
 
       <CodeBlock language="plaintext">
 {`Input: n = 3, k = 2, row = 0, column = 0
 Output: 0.0625
-Explanation: There are 8 possible move sequences, only 2 keep the knight on board`}
+Explanation: Of 64 equally likely two-move sequences, 4 stay on board: 4/64 = 0.0625`}
       </CodeBlock>
 
       <p>
@@ -324,8 +351,8 @@ def knightProbability_tab(n, k, row, column):
 
       <p>
         In Word Break with memoization, dp[i] means "can we break the substring starting at i?"
-        We're looking forward from position i to the end. The direction flipped—dp[i] doesn't
-        include position i in the answer, it asks about everything after i.
+        We're looking forward from position i to the end, including the character at i.
+        The direction flipped from considering a prefix to considering a suffix.
       </p>
 
       <p>
@@ -387,7 +414,8 @@ dp[i] = any(dp[i - num] for num in nums)`}
       <p>
         The dimension of the DP is determined by how many variables define a unique subproblem.
         House Robber needs one (which house). Word Break needs one (which position in the
-        string). Knight Probability needs three (row, column, moves remaining).
+        string). Unique Paths needs two (row and column). Knight Probability needs three
+        (row, column, moves remaining).
       </p>
 
       <p>

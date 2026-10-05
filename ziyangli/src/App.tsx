@@ -2,6 +2,7 @@ import React from 'react';
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import Layout from './components/layout/Layout';
+import RouteScroll from './components/layout/RouteScroll';
 import Home from './pages/Home';
 import BlogIndex from './pages/BlogIndex';
 import BlogPostPage from './pages/BlogPostPage';
@@ -14,6 +15,7 @@ function App() {
   return (
     <ThemeProvider>
       <Router>
+        <RouteScroll />
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />

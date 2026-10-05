@@ -136,8 +136,9 @@ function ProgressBar({
   const activeRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     activeRef.current?.scrollIntoView({
-      behavior: 'smooth',
+      behavior: reduceMotion ? 'auto' : 'smooth',
       block: 'nearest',
       inline: 'center',
     });
@@ -147,7 +148,6 @@ function ProgressBar({
     <div className="wvbd-pb-hover" data-no-advance>
       <div className="wvbd-pb">
         <button
-          ref={activeRef}
           className="wvbd-pb-chapter wvbd-pb-active"
           onClick={(event) => {
             event.stopPropagation();
@@ -161,6 +161,7 @@ function ProgressBar({
           {CHAPTER.narrations.map((_, index) => (
             <button
               key={index}
+              ref={index === step ? activeRef : undefined}
               type="button"
               aria-label={`Go to step ${index + 1}`}
               aria-current={index === step ? 'step' : undefined}
